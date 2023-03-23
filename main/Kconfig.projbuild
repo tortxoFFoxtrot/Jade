@@ -45,6 +45,9 @@ menu "Blockstream Jade"
             select CUSTOM_PINS
     endchoice
 
+    config BOARD_MOCK_SELECT_BUTTON
+        bool "Force a two button interface, with buttons A and B being the 'select' function"
+
     config DISP_INVERT_COLORS
         bool "Invert Display Colors"
         depends on BOARD_TYPE_M5_FIRE || BOARD_TYPE_M5_GRAY
@@ -95,6 +98,7 @@ menu "Blockstream Jade"
             int "BTN A"
             range -1 40
             default 37 if BOARD_TYPE_JADE_V1_1
+            default 38 if BOARD_MOCK_SELECT_BUTTON && BOARD_TYPE_M5_BLACK_GRAY
             default 39 if BOARD_TYPE_M5_FIRE || BOARD_TYPE_M5_BLACK_GRAY
             default 0 if BOARD_TYPE_TTGO_TDISPLAY
             default 25 if BOARD_TYPE_DEV
@@ -102,6 +106,7 @@ menu "Blockstream Jade"
             int "BTN B"
             range -1 40
             default 39 if BOARD_TYPE_JADE_V1_1
+            default 37 if BOARD_MOCK_SELECT_BUTTON && BOARD_TYPE_M5_BLACK_GRAY
             default 37 if BOARD_TYPE_M5_FIRE || BOARD_TYPE_M5_BLACK_GRAY
             default 35 if BOARD_TYPE_TTGO_TDISPLAY
             default 32 if BOARD_TYPE_DEV
@@ -120,6 +125,7 @@ menu "Blockstream Jade"
             range -1 40
             default 21 if BOARD_TYPE_JADE
             default 33 if BOARD_TYPE_JADE_V1_1
+            default -1 if BOARD_MOCK_SELECT_BUTTON
             default 38 if BOARD_TYPE_M5_FIRE || BOARD_TYPE_M5_BLACK_GRAY
             default 35 if BOARD_TYPE_DEV
     endmenu
