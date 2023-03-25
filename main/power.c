@@ -454,10 +454,8 @@ esp_err_t power_init(void) {
 
 esp_err_t power_shutdown(void)
 {
-    // If we don't have AXP, use esp_deep_sleep
-    power_screen_off();
-    power_backlight_off();
-    axp192_ioctl(&axp, AXP192_DCDC1_DISABLE);
+    uint8_t shutdown_command = 0x80;
+    axp192_write(&axp,0x32, &shutdown_command);
     return ESP_OK;
 }
 
