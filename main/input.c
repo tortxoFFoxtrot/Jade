@@ -222,11 +222,8 @@ void wheel_init(void)
 /*
 M5Stack-Basic has three buttons, but the A button behaves behaves badly when Bluetooth is active.
 */
-// In the case of the M5StickC-Plus, the A button stops giving a "Released" event.
-// As such, the A button simply looks for input when the button is pressed and calls "Prev"
-
-// The A button generates constant input if serial input is enabled, so the simplest fix
-// is to remove the ability to hold the button down.
+// In the case of the M5Stack-Basic, the A button generates constant input if serial input is enabled,
+// so the simplest fix is to remove the ability to hold the button down. (So remove serial event handler)
 
 static void button_A_pressed(void* arg) { wheel_prev(); }
 
