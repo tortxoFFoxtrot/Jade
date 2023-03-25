@@ -13,3 +13,9 @@
 [submodule "components/esp32_bc-ur"]
 	path = components/esp32_bc-ur
 	url = https://github.com/Blockstream/esp32_bc-ur
+[submodule "components/axp192"]
+	path = components/axp192
+	url = https://github.com/tuupola/axp192
+[submodule "components/esp_i2c_helper"]
+	path = components/esp_i2c_helper
+	url = https://github.com/tuupola/esp_i2c_helper

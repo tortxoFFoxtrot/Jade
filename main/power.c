@@ -428,6 +428,110 @@ bool usb_connected(void)
 #endif
     return is_usb_connected;
 }
+#elif defined(CONFIG_BOARD_TYPE_M5_STICKC_PLUS) //M5StickC-Plus has AXP192, but configured differently to the Jade
+#include <axp192.h>
+#include <i2c_helper.h>
+
+static axp192_t axp;
+static i2c_port_t i2c_port = I2C_NUM_0;
+
+esp_err_t power_init(void) {
+
+    //ESP_LOGI(TAG, "Initializing I2C");
+    i2c_init(i2c_port);
+
+    //ESP_LOGI(TAG, "Initializing AXP192");
+    axp.read = &i2c_read;
+    axp.write = &i2c_write;
+    axp.handle = &i2c_port;
+
+    axp192_init(&axp);
+    axp192_ioctl(&axp, AXP192_COULOMB_COUNTER_ENABLE, NULL);
+    axp192_ioctl(&axp, AXP192_COULOMB_COUNTER_CLEAR, NULL);
+
+    return ESP_OK;
+}
+
+esp_err_t power_shutdown(void)
+{
+    // If we don't have AXP, use esp_deep_sleep
+    power_screen_off();
+    power_backlight_off();
+    axp192_ioctl(&axp, AXP192_DCDC1_DISABLE);
+    return ESP_OK;
+}
+
+esp_err_t power_screen_on(void) {
+    axp192_ioctl(&axp, AXP192_LDO3_ENABLE);
+    return ESP_OK;
+}
+
+esp_err_t power_screen_off(void) {
+    axp192_ioctl(&axp, AXP192_LDO3_DISABLE);
+    return ESP_OK;
+}
+
+esp_err_t power_backlight_on(void) {
+    axp192_ioctl(&axp, AXP192_LDO2_ENABLE);
+    return ESP_OK;
+}
+
+esp_err_t power_backlight_off(void) {
+    axp192_ioctl(&axp, AXP192_LDO2_DISABLE);
+    return ESP_OK;
+}
+
+esp_err_t power_camera_on(void) { return ESP_OK; }
+esp_err_t power_camera_off(void) { return ESP_OK; }
+
+uint16_t power_get_vbat(void) {
+    float vbat;
+    axp192_read(&axp, AXP192_BATTERY_VOLTAGE, &vbat);
+    return 0;
+}
+
+uint8_t power_get_battery_status(void) { return 0; }
+
+bool power_get_battery_charging(void) {
+    bool charge;
+    axp192_read(&axp, AXP192_CHARGE_STATUS, &charge);
+    return charge;
+}
+
+uint16_t power_get_ibat_charge(void) {
+    float icharge;
+    axp192_read(&axp, AXP192_CHARGE_CURRENT, &icharge);
+    return 0; }
+
+uint16_t power_get_ibat_discharge(void) {
+    float idischarge;
+    axp192_read(&axp, AXP192_DISCHARGE_CURRENT, &idischarge);
+    return 0;
+}
+
+uint16_t power_get_vusb(void) {
+    float vvbus;
+    axp192_read(&axp, AXP192_VBUS_VOLTAGE, &vvbus);
+    return 0;
+}
+
+uint16_t power_get_iusb(void) {
+    float ivbus;
+    axp192_read(&axp, AXP192_VBUS_CURRENT, &ivbus);
+    return 0;
+}
+
+uint16_t power_get_temp(void) {
+    float temp;
+    axp192_read(&axp, AXP192_TEMP, &temp);
+    return 0;
+}
+
+bool usb_connected(void) {
+    bool power;
+    axp192_read(&axp, AXP192_POWER_STATUS, &power);
+    return 1;
+}
 
 #else // ie. not CONFIG_BOARD_TYPE_JADE or CONFIG_BOARD_TYPE_JADE_V1_1
 // Stubs for non-Jade hw boards (ie. no AXP)
