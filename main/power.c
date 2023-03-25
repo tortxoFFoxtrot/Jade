@@ -483,34 +483,53 @@ esp_err_t power_camera_on(void) { return ESP_OK; }
 esp_err_t power_camera_off(void) { return ESP_OK; }
 
 uint16_t power_get_vbat(void) {
-    float vbat;
-    axp192_read(&axp, AXP192_BATTERY_VOLTAGE, &vbat);
+    float vbat_float;
+    axp192_read(&axp, AXP192_BATTERY_VOLTAGE, &vbat_float);
+    uint16_t vbat_mv = vbat_float * 1000;
+    return vbat_mv;
+}
+
+uint8_t power_get_battery_status(void)
+{
+    const uint16_t vbat = power_get_vbat();
+    if (vbat > 4000) {
+        return 5;
+    } else if (vbat > 3850) {
+        return 4;
+    } else if (vbat > 3700) {
+        return 3;
+    } else if (vbat > 3550) {
+        return 2;
+    } else if (vbat > 3400) {
+        return 1;
+    }
     return 0;
 }
 
-uint8_t power_get_battery_status(void) { return 0; }
-
 bool power_get_battery_charging(void) {
-    bool charge;
-    axp192_read(&axp, AXP192_CHARGE_STATUS, &charge);
-    return charge;
+    //Directly reading AXP192_CHARGE_STATUS seems to be unreliable, so just check the USB bus voltage instead
+    return (power_get_ibat_charge() > 0);
 }
 
 uint16_t power_get_ibat_charge(void) {
-    float icharge;
-    axp192_read(&axp, AXP192_CHARGE_CURRENT, &icharge);
-    return 0; }
+    float icharge_float;
+    axp192_read(&axp, AXP192_CHARGE_CURRENT, &icharge_float);
+    uint16_t icharge_ma = icharge_float * 1000;
+    return icharge_ma;
+}
 
 uint16_t power_get_ibat_discharge(void) {
-    float idischarge;
-    axp192_read(&axp, AXP192_DISCHARGE_CURRENT, &idischarge);
-    return 0;
+    float idischarge_float;
+    axp192_read(&axp, AXP192_DISCHARGE_CURRENT, &idischarge_float);
+    uint16_t idischarge_ma = idischarge_float * 1000;
+    return idischarge_ma;
 }
 
 uint16_t power_get_vusb(void) {
-    float vvbus;
-    axp192_read(&axp, AXP192_VBUS_VOLTAGE, &vvbus);
-    return 0;
+    float vvbus_float;
+    axp192_read(&axp, AXP192_VBUS_VOLTAGE, &vvbus_float);
+    uint16_t vusb_mv = vvbus_float * 1000;
+    return vusb_mv;
 }
 
 uint16_t power_get_iusb(void) {
@@ -522,13 +541,13 @@ uint16_t power_get_iusb(void) {
 uint16_t power_get_temp(void) {
     float temp;
     axp192_read(&axp, AXP192_TEMP, &temp);
-    return 0;
+    uint16_t temp_int = temp;
+    return temp_int;
 }
 
 bool usb_connected(void) {
-    bool power;
-    axp192_read(&axp, AXP192_POWER_STATUS, &power);
-    return 1;
+    //Directly reading AXP192_POWER_STATUS seems to be unreliable, so just check the USB bus voltage instead
+    return (power_get_vusb() > 4000);
 }
 
 #else // ie. not CONFIG_BOARD_TYPE_JADE or CONFIG_BOARD_TYPE_JADE_V1_1
