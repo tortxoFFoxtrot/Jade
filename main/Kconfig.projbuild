@@ -48,9 +48,6 @@ menu "Blockstream Jade"
             select CUSTOM_PINS
     endchoice
 
-    config BOARD_MOCK_SELECT_BUTTON
-        bool "Force a two button interface, with buttons A and B being the 'select' function"
-
     config DISP_INVERT_COLORS
         bool "Invert Display Colors"
         depends on BOARD_TYPE_M5_FIRE || BOARD_TYPE_M5_GRAY
