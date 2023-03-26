@@ -52,11 +52,11 @@ cd $HOME/jade
 cp configs/sdkconfig_jade.defaults sdkconfig.defaults
 idf.py flash monitor
 ```
-_Some hardware configurations (eg: M5StickC-Plus) may not support the default baud rate and won't be detected, so you can force a specific baud rate for flash/monitor by using the `-b` argument.
+_Some hardware configurations (eg: M5StickC-Plus) may not support the default baud rate and won't be detected, so you can force a lower baud rate for flash/monitor by using the `-b` argument.
 
 _For example, the last line of the above code block would change be:_
 ```
-idf.py -b 1500000 flash monitor
+idf.py -b 115200 flash monitor
 ```
 
 # Build configurations
