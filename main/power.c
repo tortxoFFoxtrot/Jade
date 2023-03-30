@@ -437,10 +437,8 @@ static i2c_port_t i2c_port = I2C_NUM_0;
 
 esp_err_t power_init(void) {
 
-    //ESP_LOGI(TAG, "Initializing I2C");
     i2c_init(i2c_port);
 
-    //ESP_LOGI(TAG, "Initializing AXP192");
     axp.read = &i2c_read;
     axp.write = &i2c_write;
     axp.handle = &i2c_port;
@@ -548,6 +546,191 @@ uint16_t power_get_temp(void) {
 bool usb_connected(void) {
     //Directly reading AXP192_POWER_STATUS seems to be unreliable, so just check the USB bus voltage instead
     return (power_get_vusb() > 4000);
+}
+
+#elif defined(CONFIG_BOARD_TYPE_M5_BLACK_GRAY) || defined(CONFIG_BOARD_TYPE_M5_FIRE) //M5Stack Basic with IP5303 Power PMU
+#include <esp_sleep.h>
+#include <driver/i2c.h>
+
+static SemaphoreHandle_t i2c_mutex = NULL;
+
+#define I2C_BATTERY_PORT I2C_NUM_0
+
+#define ACK_CHECK_EN 0x1 /*!< I2C master will check ack from slave*/
+#define ACK_CHECK_DIS 0x0 /*!< I2C master will not check ack from slave */
+#define ACK_VAL 0x0 /*!< I2C ack value */
+#define NACK_VAL 0x1 /*!< I2C nack value */
+
+#define I2C_CHECK_RET(expr)                                                                                            \
+    do {                                                                                                               \
+        const esp_err_t res = (expr);                                                                                  \
+        if (res != ESP_OK) {                                                                                           \
+            JADE_LOGE("i2c call returned: %u", res);                                                                   \
+            return res;                                                                                                \
+        }                                                                                                              \
+    } while (false)
+
+#define I2C_LOG_ANY_ERROR(expr)                                                                                        \
+    do {                                                                                                               \
+        const esp_err_t res = (expr);                                                                                  \
+        if (res != ESP_OK) {                                                                                           \
+            JADE_LOGE("i2c call returned: %u", res);                                                                   \
+        }                                                                                                              \
+    } while (false)
+
+// NOTE: i2c_mutex must be claimed before calling
+static esp_err_t _power_master_write_slave(uint8_t address, uint8_t* data_wr, size_t size)
+{
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+
+    I2C_LOG_ANY_ERROR(i2c_master_start(cmd));
+    I2C_LOG_ANY_ERROR(i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_WRITE, true));
+    I2C_LOG_ANY_ERROR(i2c_master_write(cmd, data_wr, size, true));
+    I2C_LOG_ANY_ERROR(i2c_master_stop(cmd));
+
+    const esp_err_t ret = i2c_master_cmd_begin(I2C_BATTERY_PORT, cmd, 1000 / portTICK_PERIOD_MS);
+    I2C_LOG_ANY_ERROR(ret);
+
+    i2c_cmd_link_delete(cmd);
+    return ret;
+}
+
+// NOTE: i2c_mutex must be claimed before calling
+static esp_err_t _power_master_read_slave(uint8_t address, uint8_t register_address, uint8_t* data_rd, size_t size)
+{
+    if (size == 0) {
+        return ESP_OK;
+    }
+
+    I2C_CHECK_RET(_power_master_write_slave(address, &register_address, 1));
+
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    I2C_LOG_ANY_ERROR(i2c_master_start(cmd));
+    I2C_LOG_ANY_ERROR(i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_READ, ACK_CHECK_EN));
+    if (size > 1) {
+        I2C_LOG_ANY_ERROR(i2c_master_read(cmd, data_rd, size - 1, ACK_VAL));
+    }
+
+    I2C_LOG_ANY_ERROR(i2c_master_read_byte(cmd, data_rd + size - 1, NACK_VAL));
+    I2C_LOG_ANY_ERROR(i2c_master_stop(cmd));
+
+    const esp_err_t ret = i2c_master_cmd_begin(I2C_BATTERY_PORT, cmd, 1000 / portTICK_PERIOD_MS);
+    I2C_LOG_ANY_ERROR(ret);
+
+    i2c_cmd_link_delete(cmd);
+    return ret;
+}
+
+static esp_err_t _power_write_command(uint8_t reg, uint8_t val)
+{
+    uint8_t arr[] = { reg, val };
+    I2C_CHECK_RET(_power_master_write_slave(0x34, arr, 2));
+    vTaskDelay(20 / portTICK_PERIOD_MS);
+    return ESP_OK;
+}
+
+esp_err_t power_init(void) {
+
+    const i2c_config_t conf = {
+        .mode = I2C_MODE_MASTER,
+        .sda_io_num = 21,
+        .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_io_num = 22,
+        .scl_pullup_en = GPIO_PULLUP_ENABLE,
+        .master.clk_speed = 400000,
+        .clk_flags = 0,
+    };
+
+    I2C_CHECK_RET(i2c_param_config(I2C_BATTERY_PORT, &conf));
+    I2C_CHECK_RET(i2c_driver_install(I2C_BATTERY_PORT, conf.mode, 0, 0, 0));
+
+    // Create and load the i2c mutex
+    i2c_mutex = xSemaphoreCreateBinary();
+    JADE_ASSERT(i2c_mutex);
+    xSemaphoreGive(i2c_mutex);
+    return ESP_OK;
+}
+
+esp_err_t power_shutdown(void)
+{
+    // If we don't have AXP, use esp_deep_sleep
+    esp_deep_sleep_start();
+    return ESP_OK;
+}
+
+esp_err_t power_screen_on(void) { return ESP_OK; }
+esp_err_t power_screen_off(void) { return ESP_OK; }
+
+esp_err_t power_backlight_on(void) { return ESP_OK; }
+esp_err_t power_backlight_off(void) { return ESP_OK; }
+
+esp_err_t power_camera_on(void) { return ESP_OK; }
+esp_err_t power_camera_off(void) { return ESP_OK; }
+
+uint16_t power_get_vbat(void)
+{
+    uint8_t buf;
+    JADE_SEMAPHORE_TAKE(i2c_mutex);
+    I2C_LOG_ANY_ERROR(_power_master_read_slave(0x75, 0x78, &buf, 1));;
+    JADE_SEMAPHORE_GIVE(i2c_mutex);
+    switch (buf & 0xF0)
+    {
+      case 0x00:
+        return 4150;
+      case 0x80:
+        return 3900;
+      case 0xC0:
+        return 3700;
+      case 0xE0:
+        return 3500;
+      default:
+        return 3400;
+    }
+}
+
+uint8_t power_get_battery_status(void)
+{
+    uint8_t buf;
+    JADE_SEMAPHORE_TAKE(i2c_mutex);
+    I2C_LOG_ANY_ERROR(_power_master_read_slave(0x75, 0x78, &buf, 1));;
+    JADE_SEMAPHORE_GIVE(i2c_mutex);
+    switch (buf & 0xF0)
+    {
+      case 0x00:
+        return 5;
+      case 0x80:
+        return 4;
+      case 0xC0:
+        return 3;
+      case 0xE0:
+        return 2;
+      default:
+        return 1;
+    }
+}
+
+bool power_get_battery_charging(void)
+{
+    uint8_t chargedata;
+    JADE_SEMAPHORE_TAKE(i2c_mutex);
+    I2C_LOG_ANY_ERROR(_power_master_read_slave(0x75, 0x70, &chargedata, 1));
+    JADE_SEMAPHORE_GIVE(i2c_mutex);
+    return (chargedata & 0x08) && power_get_battery_status() != 5;
+}
+uint16_t power_get_ibat_charge(void) { return 0; }
+uint16_t power_get_ibat_discharge(void) { return 0; }
+uint16_t power_get_vusb(void) { return 0; }
+uint16_t power_get_iusb(void) { return 0; }
+uint16_t power_get_temp(void) { return 0; }
+
+bool usb_connected(void)
+{
+    uint8_t chargedata, chargedata2;
+    JADE_SEMAPHORE_TAKE(i2c_mutex);
+    I2C_LOG_ANY_ERROR(_power_master_read_slave(0x75, 0x70, &chargedata, 1));
+    I2C_LOG_ANY_ERROR(_power_master_read_slave(0x75, 0x71, &chargedata2, 1));
+    JADE_SEMAPHORE_GIVE(i2c_mutex);
+    return ((chargedata & 0x08) || (chargedata2 & 0x08));
 }
 
 #else // ie. not CONFIG_BOARD_TYPE_JADE or CONFIG_BOARD_TYPE_JADE_V1_1
