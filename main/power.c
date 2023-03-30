@@ -694,6 +694,7 @@ uint8_t power_get_battery_status(void)
     JADE_SEMAPHORE_TAKE(i2c_mutex);
     I2C_LOG_ANY_ERROR(_power_master_read_slave(0x75, 0x78, &buf, 1));;
     JADE_SEMAPHORE_GIVE(i2c_mutex);
+    //IP5306 only offers battery level in 25% increments, as opposed to the Jade's UI which displays it in 20%. (So skip just 2)
     switch (buf & 0xF0)
     {
       case 0x00:
@@ -703,9 +704,9 @@ uint8_t power_get_battery_status(void)
       case 0xC0:
         return 3;
       case 0xE0:
-        return 2;
-      default:
         return 1;
+      default:
+        return 0;
     }
 }
 
@@ -733,8 +734,8 @@ bool usb_connected(void)
     return ((chargedata & 0x08) || (chargedata2 & 0x08));
 }
 
-#else // ie. not CONFIG_BOARD_TYPE_JADE or CONFIG_BOARD_TYPE_JADE_V1_1
-// Stubs for non-Jade hw boards (ie. no AXP)
+#else // ie. not CONFIG_BOARD_TYPE_JADE or CONFIG_BOARD_TYPE_JADE_V1_1, M5Stack or M5Stick
+// Stubs for other hw boards (ie. no power management)
 #include <esp_sleep.h>
 
 esp_err_t power_init(void) { return ESP_OK; }
