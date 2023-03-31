@@ -1,3 +1,8 @@
+# WARNING
+DO NOT ATTEMPT TO FLASH DIY FIRMWARE TO OFFICIAL BLOCKSTREAM JADE HW UNITS
+
+DO NOT ATTEMPT TO FLASH OFFICIAL BLOCKSTREAM FIRMWARE TO YOUR DIY HARDWARE
+
 # Hardware Selection
 There are a number of hardware devices that can run Jade firmware with minimal configuration by simply following the build guide in the main readme.
 
@@ -47,7 +52,7 @@ You can find suggested configuration templates for various hardware in the "diy"
 
 `CONFIG_DEBUG_MODE=y` 
 
-## Enabling Secure Boot 
+## Enabling Secure Boot  
 If you want to maximise the physical security of your device and prevent it from running firmware that you haven't signed with your signing key, you can enable Secure Boot.
 
 You can find suggested configuration templates for various hardware in the "diy" folder of this repository. These are designed to mimic the settings found on a retail Jade device.
