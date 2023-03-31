@@ -9,7 +9,7 @@ To build you can use the docker image (see Dockerfile) or install the esp-idf to
 
 # DIY Hardware & Programmings Notes
 For information about suitable DIY hardware, as well as suggested configuration profiles and notes on secure boot.
-[DIY Guide](./diy/readme.md)
+[DIY Notes](./diy/readme.md)
 # Use docker
 
 Note the supplied docker-compose.yml assumes the Jade device is at
