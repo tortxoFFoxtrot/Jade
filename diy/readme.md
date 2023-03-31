@@ -40,7 +40,7 @@ There are a number of hardware devices that can run Jade firmware with minimal c
 * Typically supports Secure Boot V2
 
 # Modifying Configuration Files for Use
-Once you are familiar with the process of flashing the firmware using the sdkconfig templates that are included with this repository, there are some additional changes that you should make to these files before using them with actual funds. You can find example of suggested configuration files for both "nodebug" and "secureboot" the "diy" folder of this repository.
+Once you are familiar with the process of flashing the firmware using the sdkconfig templates that are included in the /config folder of this repository, there are some additional changes that you should make to these files before using the device with actual funds. You can find example of suggested configuration files for both "nodebug" and "secureboot" the "diy" folder of this repository.
 
 ## Disabling Debug Features
 If editing the default development configuration template...
