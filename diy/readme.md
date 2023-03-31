@@ -7,28 +7,31 @@ DO NOT ATTEMPT TO FLASH OFFICIAL BLOCKSTREAM FIRMWARE TO YOUR DIY HARDWARE
 There are a number of hardware devices that can run Jade firmware with minimal configuration by simply following the build guide in the main readme.
 
 ## No-Camera Hardware Options:
-###TTGO (Lillygo) T-Display
+
+### TTGO (Lillygo) T-Display
 ![](img/ttgo-tdisplay.jpg)
 * ~$10 USD
 * Two button interface (Press both together to select)
 * No battery
 * No case
 * Typically supports Secure Boot V2
-###M5 StickC-Plus
+
+### M5 StickC-Plus
 ![](img/M5StickCPlus.jpg)
 * ~$20 USD
 * Two button interface (Long press front button to select)
 * Includes 120mAh battery
 * Fully assembled with case
 * Typically supports Secure Boot V1
-###M5 Stack Basic
+
+### M5 Stack Basic
 ![](img/M5Stack-Basic.jpg)
 * ~$40 USD
 * Three button interface (Middle button to select)
 * Includes 110mAh battery
 * Fully assembled with case
 * Typically supports Secure Boot V2
-###M5 Stack Fire (~$50 USD)
+### M5 Stack Fire (~$50 USD)
 * ~$40 USD
 * Extra 8mb PSRAM (When compared to Basic)
 * Three button interface (Middle button to select)
