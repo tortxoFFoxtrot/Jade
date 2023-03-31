@@ -39,7 +39,7 @@ There are a number of hardware devices that can run Jade firmware with minimal c
 * Typically supports Secure Boot V2
 ### M5 Stack Fire (~$50 USD)
 * [Vendor Product Page](https://shop.m5stack.com/collections/m5-controllers/products/m5stack-fire-iot-development-kit-psram-v2-6)
-* ~$40 USD
+* ~$50 USD
 * Extra 8mb PSRAM (When compared to Basic)
 * Three button interface (Middle button to select)
 * Includes 500mAh battery
