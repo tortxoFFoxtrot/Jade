@@ -8,7 +8,7 @@ There are a number of hardware devices that can run Jade firmware with minimal c
 
 ## No-Camera Hardware Options:
 
-### TTGO (Lillygo) T-Display
+### TTGO (Lilygo) T-Display
 ![](img/ttgo-tdisplay.jpg)
 * [Vendor Product Page](https://www.lilygo.cc/en-ca/products/lilygo%C2%AE-ttgo-t-display-1-14-inch-lcd-esp32-control-board)
 * ~$10 USD
