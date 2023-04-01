@@ -7,7 +7,7 @@ They are not for updating the firmware of an official Blockstream Jade hw unit -
 
 To build you can use the docker image (see Dockerfile) or install the esp-idf toolchain and repo following the commands in this readme.
 
-# DIY Hardware & Programmings Notes
+# DIY Hardware & Programming Notes
 For information about suitable DIY hardware, as well as suggested configuration profiles and notes on secure boot.
 [DIY Notes](./diy/readme.md)
 # Use docker
