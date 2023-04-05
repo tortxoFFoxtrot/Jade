@@ -88,6 +88,32 @@ _Depending on the hardare you have selected, you may need to remove the last lin
 
 `CONFIG_EFUSE_VIRTUAL=y`
 
+# Disabling Bluetooth
+If you would prefer to completely disable Bluetooth, you can also make the following modifications to your configuration template.
+
+You can find suggested configuration templates for various hardware in the "diy" folder of this repository. These are designed to mimic the settings found on a retail Jade device. (For both no-debug and secure-boot templates)
+
+**Add**
+    CONFIG_APP_NO_BLOBS=y
+    CONFIG_MBEDTLS_ECP_RESTARTABLE=y
+    CONFIG_MBEDTLS_CMAC_C=y
+
+**Remove**
+    CONFIG_BT_ENABLED=y
+    CONFIG_BT_NIMBLE_ENABLED=y
+    CONFIG_BT_NIMBLE_MEM_ALLOC_MODE_EXTERNAL=y
+    CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
+    # CONFIG_BT_NIMBLE_ROLE_CENTRAL is not set
+    # CONFIG_BT_NIMBLE_ROLE_BROADCASTER is not set
+    # CONFIG_BT_NIMBLE_ROLE_OBSERVER is not set
+    CONFIG_BT_NIMBLE_NVS_PERSIST=y
+    # CONFIG_BT_NIMBLE_SM_LEGACY is not set
+    CONFIG_BT_NIMBLE_SVC_GAP_DEVICE_NAME="j"
+    CONFIG_BT_NIMBLE_GAP_DEVICE_NAME_MAX_LEN=11
+    CONFIG_BT_NIMBLE_ATT_PREFERRED_MTU=517
+    CONFIG_BTDM_CTRL_BLE_MAX_CONN=1
+    # CONFIG_BTDM_CTRL_FULL_SCAN_SUPPORTED is not set
+
 # Upgrading firmware via OTA
 If you have enabled secure boot with the settings suggested above you will need to do firmware updates via OTA.
 
