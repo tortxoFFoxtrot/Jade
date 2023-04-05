@@ -94,11 +94,13 @@ If you would prefer to completely disable Bluetooth, you can also make the follo
 You can find suggested configuration templates for various hardware in the "diy" folder of this repository. These are designed to mimic the settings found on a retail Jade device. (For both no-debug and secure-boot templates)
 
 **Add**
+
     CONFIG_APP_NO_BLOBS=y
     CONFIG_MBEDTLS_ECP_RESTARTABLE=y
     CONFIG_MBEDTLS_CMAC_C=y
 
 **Remove**
+
     CONFIG_BT_ENABLED=y
     CONFIG_BT_NIMBLE_ENABLED=y
     CONFIG_BT_NIMBLE_MEM_ALLOC_MODE_EXTERNAL=y
