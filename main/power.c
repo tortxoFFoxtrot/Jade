@@ -785,8 +785,6 @@ esp_err_t power_init(void)
 esp_err_t power_shutdown(void)
 {
     gpio_set_level( POWER_HOLD_GPIO, 0 );
-    // If we don't have a PMU, use esp_deep_sleep
-    esp_deep_sleep_start();
     return ESP_OK;
 }
 
@@ -809,22 +807,21 @@ uint16_t power_get_vbat(void)
 {
     int vbat=0;
     ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, BATTERY_ADC_CHANNEL, &vbat));
-    JADE_LOGE("vbat: %u", vbat);
-    return (uint16_t)vbat * 1.7;
+    return (uint16_t)(vbat * 1.7);
 }
 
 uint8_t power_get_battery_status(void)
 {
     const uint16_t vbat = power_get_vbat();
-    if (vbat > 4100) {
+    if (vbat > 4000) {
         return 5;
-    } else if (vbat > 3900) {
+    } else if (vbat > 3800) {
         return 4;
-    } else if (vbat > 3700) {
+    } else if (vbat > 3600) {
         return 3;
-    } else if (vbat > 3500) {
+    } else if (vbat > 3400) {
         return 2;
-    } else if (vbat > 3300) {
+    } else if (vbat > 3200) {
         return 1;
     }
     return 0;
